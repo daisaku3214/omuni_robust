@@ -138,8 +138,8 @@ classdef omunirobot
                -cosqw*obj.x(5)-obj.para.r*obj.x(6)))';
        end
        function F = calcF(obj,dx)
-           sinqw = sin(obj.x(3)+obj.para.r);
-           cosqw = cos(obj.x(3)+obj.para.r);
+           sinqw = sin(obj.x(3)+obj.para.alpha);
+           cosqw = cos(obj.x(3)+obj.para.alpha);
            F = (obj.const.a_m.*sinqw.*obj.x(7:end)' - obj.const.c_m.*(...
                sinqw*(dx(4)+obj.x(5)*obj.x(6))...
                +cosqw*(-dx(5)+obj.x(4)*obj.x(6))...

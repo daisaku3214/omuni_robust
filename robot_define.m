@@ -33,7 +33,7 @@ JAc =JAc/10^(7);%[kgm^2]    The inertia of the rotor of the nominal motor
 Gc =  50;       %           The ratio of gear
 etac = 0.9;     %           The efficiency of gear
 %this pattern, I use omni wheel of Diameter 200mm
-Dc = 0.3;       %[m]        The dirmeter of omni wheel
+Dc = 0.4;       %[m]        The dirmeter of omni wheel
 Jc = 1;      %[kgm^2]    The inertia of the omni whell
 mc = 1.5;       %[kg]       The mass of a motor unit
 dc = 0.01;       %[Nm/sec]    The declease ratio
@@ -92,14 +92,18 @@ mC1 = [0 0 1 zeros(1,ell);
 mC2 = [zeros(numi,3) eye(numi,ell)];
 mC = [mC1;mC2];
 mD = zeros(size(mC,1),ell);
-U2omega = mC1(2:ell+1,1:3);
-omega2U = pinv(U2omega);
+v2omega = mC1(2:ell+1,1:3);
+omega2v = pinv(v2omega);
 
+
+%Determining whether controllable
 disp(size(mA));
 [~,~,~,~,k] = ctrbf(mA,mB,mC);
 disp(sum(k));
+%Determining whether observability
 [~,~,~,~,k] = obsvf(mA,mB,mC);
 disp(sum(k));
+%Determine whether the detectability
 lambda = eig(mA);
 [~,indextemp] = sort(real(lambda),'descend');
 lambda = lambda(indextemp);

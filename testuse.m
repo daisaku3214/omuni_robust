@@ -2,12 +2,21 @@ close all;
 clear all;
 robot_define;           %definition robot parameter
 control_define;         %definition contorol parameter
+robo = omunirobot(parameter,Deltat,[p0;zeros(3+ell,1)],zeros(ell,1));
+%input example:ramp input:move circle
+% u1 = v2omega*[-pi/4*2 0 -pi/4]';
+% times = [2 10 2 1];     %[sec] the time of input shaping
+% time = sum(times);      %[sec] simuration time
+% length = time/Deltat.simvel;
+% lamp1 = linspace(0,1,times(1)/time*length);
+% step1 = ones(1,times(2)/time*length);
+% lamp2 = linspace(1,0,times(3)/time*length);
+% step2 = zeros(1,times(4)/time*length);
+% u = u1*[lamp1 step1 lamp2 step2];
+%input example:ramp input:move linear
 times = [1 1 1 1 1 1 1 1];     %[sec] the time of input shaping
 time = sum(times);      %[sec] simuration time
 length = time/Deltat.simvel;
-robo = omunirobot(parameter,Deltat,[p0;zeros(3+ell,1)],zeros(ell,1));
-%input example:ramp input
-%u1 = v2omega*[-pi/4*2 0 -pi/4]';
 u1 = v2omega*[2 0 0]';
 u2 = v2omega*[-2 -2 0]';
 lamp1 = linspace(0,1,times(1)/time*length);

@@ -3,7 +3,7 @@
 %this file is definition of robot parameter
 %%
 %common definition
-dt_simcir =1e-5;%sampling time for circuit equation
+dt_simcir =1e-4;%sampling time for circuit equation
 dt_simvel =1e-3;%sampling time for velocity simulation
 dt_simpos =1e-2;%sampling time for position simulation
 ell = 4;        %the number of motor

@@ -9,12 +9,14 @@ classdef omunirobot
                 %u = [V_1\cdots V_\ell]^T
                 %size(u) = [para.ell 1];
        F;
+       t;
    end
    properties(SetAccess = private, GetAccess = public)
        Deltat;
        Xlog;
        Ulog;
        Flog;
+       Tlog;
    end
    methods
        function obj = omunirobot(parameter,Deltat,x0,u0)
@@ -37,10 +39,12 @@ classdef omunirobot
                               'ratiovel',ratiovel);
            obj.x = x0;
            obj.u = u0;
+           obj.t = 0;
            obj.F = obj.calcF(zeros(obj.para.ell));
            obj.Xlog = x0;
            obj.Ulog = u0;
            obj.Flog = obj.F;
+           obj.Tlog = obj.t;
        end
        function obj = restlog(obj,x0,u0)
            obj.x = x0;
@@ -131,7 +135,7 @@ classdef omunirobot
                +cosqw*(-dx(5)+obj.x(4)*obj.x(6))...
                -obj.para.r*dx(6))...
                -2*(obj.para.d_m./obj.para.D_m).*(sinqw*obj.x(4)...
-               -cosqw*obj.x(5)-obj.para.r*obj.x(6)));
+               -cosqw*obj.x(5)-obj.para.r*obj.x(6)))';
        end
        function F = calcF(obj,dx)
            sinqw = sin(obj.x(3)+obj.para.r);
@@ -141,12 +145,9 @@ classdef omunirobot
                +cosqw*(-dx(5)+obj.x(4)*obj.x(6))...
                -obj.para.r*dx(6))...
                -2*(obj.para.d_m./obj.para.D_m).*(sinqw*obj.x(4)...
-               -cosqw*obj.x(5)-obj.para.r*obj.x(6)));
+               -cosqw*obj.x(5)-obj.para.r*obj.x(6)))';
        end
        function obj = shiftx(obj)
-           obj.Xlog = [obj.Xlog obj.x];
-           obj.Ulog = [obj.Ulog obj.u];
-           obj.Flog = [obj.Flog obj.F];
            for i = 1:obj.const.ratiocir
            tempx = obj.x;
                [k1,Fk1] = obj.calcdx;
@@ -159,6 +160,11 @@ classdef omunirobot
                obj.x = tempx + (k1+2*k2+2*k3+k4)*obj.Deltat.simcir/6;
                obj.F = (Fk1+2*Fk2+2*Fk3+Fk4)/6;
            end
+           obj.t = obj.t + obj.Deltat.simvel;
+           obj.Xlog = [obj.Xlog obj.x];
+           obj.Ulog = [obj.Ulog obj.u];
+           obj.Flog = [obj.Flog obj.F];
+           obj.Tlog = [obj.Tlog obj.t];
        end
    end
 end

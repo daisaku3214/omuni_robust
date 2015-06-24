@@ -24,11 +24,11 @@ figure;
 for i = 1:ell
 subplot(ell,1,i);
 plot(robo.Tlog,robo.Flog(i,:));
-xlime([0 time]);
+xlim([0 time]);
 end
 figure;
 for i = 1:3
 subplot(3,1,i);
 plot(robo.Tlog,robo.Xlog(i,:));
-xlime([0 time]);
+xlim([0 time]);
 end

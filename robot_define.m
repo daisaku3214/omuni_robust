@@ -82,9 +82,9 @@ Komega = 2*G_m.*KE_m./(L_m.*D_m);
 mKx = Komega.*sin(alpha);
 mKy = Komega.*cos(alpha);
 mKq = Komega.*r;
-mKomega = [-mKx' mKy' mKq'];
+mK = [-mKx' mKy' mKq'];
 mA = [zeros(3,3) mA1;
-      mKomega -mR];
+      mK -mR];
 mB = [zeros(3,ell);mB2];
 
 mC1 = [0 0 1 zeros(1,ell);

@@ -75,8 +75,10 @@ for i = 1:(length)/robo.const.ratiovel
     for j = 1:robo.const.ratiovel
     robo = robo.shiftx;
     xe = robo.x(1:3) - x(1:3,robo.const.ratiovel*(i-1)+j);
-    vref = v(:,robo.const.ratiovel*(i-1)+j) + Kpd*([robo.Ttrans*xe;robo.x(7:end)]);
-    robo.u = -Kvd*([robo.Ttrans*robo.x(4:6);robo.x(7:end)]-vref)...
+    vref = v(:,robo.const.ratiovel*(i-1)+j) + Kpd*([robo.Ttrans*xe;zeros(ell,1)]);
+%     robo.u = -Kvd*([robo.Ttrans*robo.x(4:6);robo.x(7:end)]-vref)...
+%              +u(:,robo.const.ratiovel*(i-1)+j);
+    robo.u = -Kvd*([robo.Ttrans*robo.x(4:6);zeros(ell,1)]-vref)...
              +u(:,robo.const.ratiovel*(i-1)+j);
     Vrefworld(:,robo.const.ratiovel*(i-1)+j) =...
     [cos(x(3,robo.const.ratiovel*(i-1)+j)) -sin(x(3,robo.const.ratiovel*(i-1)+j)) 0;
@@ -86,13 +88,22 @@ for i = 1:(length)/robo.const.ratiovel
 end
 %%
 makemoviefromomunirobot_withref(robo,limit,x,'movieK22deg');
+%plot grip force
 figure;
 for i = 1:ell
 subplot(ell,1,i);
 plot(robo.Tlog,robo.Flog(i,:),'-b');
 xlim([0 time]);
 end
+%plot motor current
 figure;
+for i = 1:ell
+subplot(ell,1,i);
+plot(robo.Tlog,robo.Xlog(6+i,:),'-b');
+xlim([0 time]);
+end
+figure;
+%plot robot posture
 for i = 1:3
 subplot(3,1,i);
 plot(robo.Tlog,robo.Xlog(i,:),'-b');
@@ -101,6 +112,7 @@ plot(robo.Tlog,x(i,:),'--m')
 xlim([0 time]);
 end
 figure;
+%plot robot velosity
 for i = 1:3
 subplot(3,1,i);
 plot(robo.Tlog,robo.Xlog(3+i,:),'-b');

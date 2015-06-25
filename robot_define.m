@@ -58,22 +58,35 @@ cosalpha = cos(alpha);
 a_m = 2*eta_m.*G_m.*KT_m./D_m;
 b_m = 2*(J_m+eta_m.*G_m.^2.*JA_m)./D_m;
 c_m = 2*b_m./D_m;
+dD_m =2*d_m./D_m;
 mMCss = sum(c_m.*sinalpha.^2)/M;
 mMCcc = sum(c_m.*cosalpha.^2)/M;
 mMCsc = sum(c_m.*sinalpha.*cosalpha)/M;
 mMCrs = sum(r.*c_m.*sinalpha)/M;
 mMCrc = sum(r.*c_m.*cosalpha)/M;
+mMDss = sum(dD_m.*sinalpha.^2)/M;
+mMDcc = sum(dD_m.*cosalpha.^2)/M;
+mMDsc = sum(dD_m.*sinalpha.*cosalpha)/M;
+mMDrs = sum(r.*dD_m.*sinalpha)/M;
+mMDrc = sum(r.*dD_m.*cosalpha)/M;
 mICbs = sum(rprim.*c_m.*cbeta.*sinalpha)/I;
 mICbc = sum(rprim.*c_m.*cbeta.*cosalpha)/I;
 mICbr = sum(rprim.*r.*c_m.*cbeta)/I;
+mIDbs = sum(rprim.*dD_m.*cbeta.*sinalpha)/I;
+mIDbc = sum(rprim.*dD_m.*cbeta.*cosalpha)/I;
+mIDbr = sum(rprim.*dD_m.*cbeta)/I;
 mMAs = a_m.*sinalpha/M;
 mMAc = a_m.*cosalpha/M;
 mIAr = rprim.*a_m.*cbeta/I;
-mM = [1-mMCss mMCsc mMCrs;
-      mMCsc 1-mMCcc -mMCrc;
+mM = [1-mMCss mMCsc mMCrs-rgast*sin(thetagast);
+      mMCsc 1-mMCcc -mMCrc+rgast*cos(thetagast);
       mICbs -mICbc 1-mICbr];
-mK = [-mMAs;mMAc;mIAr];
-mA1 = mM\mK;
+mD = [ mMDss -mMDsc -mMDrs;
+     -mMDsc  mMDcc  mMDrc;
+     -mIDbs  mIDbc  mIDbr];
+mA = [-mMAs;mMAc;mIAr];
+mAA = mM\mA;
+mAD = mM\mD;
 mR  = diag(R_m./L_m);
 wR  = mR;
 mB2 = diag(ones(1,ell)./L_m);
@@ -83,40 +96,40 @@ mKx = Komega.*sin(alpha);
 mKy = Komega.*cos(alpha);
 mKq = Komega.*r;
 mK = [-mKx' mKy' mKq'];
-mA = [zeros(3,3) mA1;
+A = [mAD mAA;
       mK -mR];
-mB = [zeros(3,ell);mB2];
+B = [zeros(3,ell);mB2];
 
-mC1 = [0 0 1 zeros(1,ell);
+C1 = [0 0 1 zeros(1,ell);
        (2*sinalpha./D_m)' -(2*cosalpha./D_m)' -(2*rc./D_m)' zeros(ell,ell)];
-mC2 = [zeros(numi,3) eye(numi,ell)];
-mC = [mC1;mC2];
-mD = zeros(size(mC,1),ell);
-v2omega = mC1(2:ell+1,1:3);
+C2 = [zeros(numi,3) eye(numi,ell)];
+C = [C1;C2];
+D = zeros(size(C,1),ell);
+v2omega = C1(2:ell+1,1:3);
 omega2v = pinv(v2omega);
 
 
 %Determining whether controllable
-disp(size(mA));
-[~,~,~,~,k] = ctrbf(mA,mB,mC);
+disp(size(A));
+[~,~,~,~,k] = ctrbf(A,B,C);
 disp(sum(k));
 %Determining whether observability
-[~,~,~,~,k] = obsvf(mA,mB,mC);
+[~,~,~,~,k] = obsvf(A,B,C);
 disp(sum(k));
 %Determine whether the detectability
-lambda = eig(mA);
+lambda = eig(A);
 [~,indextemp] = sort(real(lambda),'descend');
 lambda = lambda(indextemp);
 clear indextemp;
 lambdatemp = 0;
-for i = 1:size(mA,1);
+for i = 1:size(A,1);
 if (lambda(i) > 0)
     lambdatemp = lambdatemp + lambda(i);
 end
 end
 lambda = lambdatemp;
 clear lambdatemp;
-disp(rank([mC;mA-lambda]));
+disp(rank([C;A-lambda]));
 
 
 parameter = struct('ell',ell,'I0',I0,'m0',m0,'rgast',rgast,...

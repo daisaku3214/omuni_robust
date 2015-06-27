@@ -6,8 +6,9 @@
 dt_simcir =1e-4;%sampling time for circuit equation
 dt_simvel =1e-3;%sampling time for velocity simulation
 dt_simpos =1e-2;%sampling time for position simulation
+g = 9.80665;    %[m/s^2] the Acceleration of gravity
 ell = 4;        %the number of motor
-I0 = 10;         %[kgm^2]    z-axis inertia of robot other than motor units
+I0 = 10;        %[kgm^2]    z-axis inertia of robot other than motor units
 m0 = 10;        %[kg]       mass of robot other than motor units
 rgast = 0;      %[m]        the radius between COM of robot and robot origin
 thetagast = 0;  %[rad]      the radian from x ast axis
@@ -32,6 +33,9 @@ JAc = 68.1;     %[gcm^2]    The inertia of the rotor of the nominal motor
 JAc =JAc/10^(7);%[kgm^2]    The inertia of the rotor of the nominal motor
 Gc =  50;       %           The ratio of gear
 etac = 0.9;     %           The efficiency of gear
+muc = 1.0;      %           The Coefficient of static friction
+ilimc = 10;     %[A]        the limit of motor current
+Vlimc = 10;     %[V]        the limit of input voltage
 %this pattern, I use omni wheel of Diameter 200mm
 Dc = 0.4;       %[m]        The dirmeter of omni wheel
 Jc = 1;      %[kgm^2]    The inertia of the omni whell
@@ -49,6 +53,9 @@ D_m = Dc*ones(1,ell);
 J_m = Jc*ones(1,ell);
 m_m = mc*ones(1,ell);
 d_m = dc*ones(1,ell);
+mu_m = muc*ones(1,ell);
+ilim_m=ilimc*ones(1,ell);
+Vlim_m=Vlimc*ones(1,ell);
 
 M = m0 + sum(m_m);
 I = I0 + sum(rprim.^2.*m_m);
@@ -132,9 +139,10 @@ clear lambdatemp;
 disp(rank([C;A-lambda]));
 
 
-parameter = struct('ell',ell,'I0',I0,'m0',m0,'rgast',rgast,...
+parameter = struct('g',g,'ell',ell,'I0',I0,'m0',m0,'rgast',rgast,...
                    'thetagast',thetagast,'alpha',alpha,'r',r,...
                    'numi',numi,'R_m',R_m,'L_m',L_m,'KT_m',KT_m,...
                    'KE_m',KE_m,'JA_m',JA_m,'G_m',G_m,'eta_m',eta_m,...
-                   'D_m',D_m,'J_m',J_m,'m_m',m_m,'d_m',d_m);
+                   'D_m',D_m,'J_m',J_m,'m_m',m_m,'d_m',d_m,...
+                   'mu_m',mu_m,'ilim_m',ilim_m,'Vlim_m',Vlim_m);
 Deltat = struct('simcir',dt_simcir,'simvel',dt_simvel,'simpos',dt_simpos);

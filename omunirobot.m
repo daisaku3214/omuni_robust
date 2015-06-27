@@ -5,6 +5,9 @@ classdef omunirobot
        x;       %state variable of this omuni robot
                 %x = [xy\theta\dot{x}\dot{y}\dot{\theta}i_1\cdots i_\ell]^T
                 %size(x) = [6+para.ell 1];
+       hatx;    %state variable of this omuni robot
+                %x = [xy\theta\dot{x}\dot{y}\dot{\theta}i_1\cdots i_\ell]^T
+                %size(x) = [6+para.ell 1];
        u;       %input variable of this omuni robot
                 %u = [V_1\cdots V_\ell]^T
                 %size(u) = [para.ell 1];
@@ -33,10 +36,15 @@ classdef omunirobot
            wB = [zeros(6,parameter.ell);wB2];
            ratiocir = Deltat.simvel/Deltat.simcir;
            ratiovel = Deltat.simpos/Deltat.simvel;
+           Hinv = pinv([ones(1,parameter.ell);
+                 parameter.r.*sin(parameter.alpha);
+                 parameter.r.*cos(parameter.alpha)]);
+           N = Hinv(:,1)*(parameter.m0+sum(parameter.m_m))*parameter.g;
+           Vlim = min(abs(parameter.Vlim_m));
            obj.const = struct('a_m',a_m,'b_m',b_m,'c_m',c_m,'dD_m',dD_m,...
                               'Komega_m',Komega_m,'Ktheta_m',Ktheta_m,...
                               'wR',wR,'wB2',wB2,'wB',wB,'ratiocir',ratiocir,...
-                              'ratiovel',ratiovel);
+                              'ratiovel',ratiovel,'N',N,'Vlim',Vlim);
            obj.x = x0;
            obj.u = u0;
            obj.t = 0;
@@ -163,6 +171,9 @@ classdef omunirobot
             F = Fai+Fcx+Fdx;
        end
        function obj = shiftx(obj)
+           if (max(abs(obj.u)) > obj.const.Vlim)
+               obj.u = obj.const.Vlim*obj.u/max(abs(obj.u));
+           end
            for i = 1:obj.const.ratiocir
            tempx = obj.x;
                [k1,Fk1] = obj.calcdx;

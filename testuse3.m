@@ -5,14 +5,14 @@ control_define;         %definition contorol parameter
 robo = omunirobot(parameter,Deltat,[p0;zeros(3+ell,1)],zeros(ell,1));
 %input example:ramp input:move circle
 R = 2;
-omega = -2*pi*1/8;
-x0 = 0;
-y0 = R;
+omega = 2*pi*1/8;
+phi0 = pi;
+x0 = -R*cos(phi0);
+y0 = -R*sin(phi0);
 theta0 = 0;
-phi0 = 3*pi/2;
-u1 = v2omega*[omega*R 0 omega]';
-v1 = [omega*R 0 omega zeros(1,ell)]';
-times = [2 6 2 1];     %[sec] the time of input shaping
+v1 = [-omega*R*sin(phi0) omega*R*cos(phi0) omega]';
+u1 = v2omega*v1;
+times = [2 12 2 1];     %[sec] the time of input shaping
 time = sum(times);      %[sec] simuration time
 length = time/Deltat.simvel;
 lamp1 = linspace(0,1,times(1)/time*length);
@@ -36,14 +36,27 @@ theta4 = theta3(end)*ones(1,times(4)/time*length);
 x4 = x0 + R*cos(theta4+phi0);
 y4 = y0 + R*sin(theta4+phi0);
 
-u = u1*[lamp1 step1 lamp2 step2];
-v = v1*[lamp1 step1 lamp2 step2];
-Vrefworld = zeros(3,length);
+% x = [x1 x2 x3 x4;
+%      y1 y2 y3 y4;
+%      theta1 theta2 theta3 theta4;
+%      zeros(ell,length)];
+% u = u1*[lamp1 step1 lamp2 step2];
+% v = v1*[lamp1 step1 lamp2 step2];
+% v = [v;zeros(ell,length)];
+% Vrefworld = zeros(3,length);
+
 x = [x1 x2 x3 x4;
      y1 y2 y3 y4;
-     theta1 theta2 theta3 theta4;
+     zeros(1,length);
      zeros(ell,length)];
+v1 = [-omega*R*sin(phi0) omega*R*cos(phi0) 0]';
+v = v1*[lamp1 step1 lamp2 step2];
+v = robo.Tarray([theta1 theta2 theta3 theta4],v);
+u = v2omega*v;
+v = [v;zeros(ell,length)];
+Vrefworld = zeros(3,length);
 x = [x x(:,end)];
+
 %input example:ramp input:move linear
 % times = [1 1 1 1 1 1 1 1];     %[sec] the time of input shaping
 % time = sum(times);      %[sec] simuration time
@@ -76,8 +89,7 @@ for i = 1:(length)/robo.const.ratiovel
     robo = robo.shiftx;
     xe = robo.x(1:3) - x(1:3,robo.const.ratiovel*(i-1)+j);
     vref = v(:,robo.const.ratiovel*(i-1)+j) + Kpd*([robo.Ttrans*xe;zeros(ell,1)]);
-%     robo.u = -Kvd*([robo.Ttrans*robo.x(4:6);robo.x(7:end)]-vref)...
-%              +u(:,robo.const.ratiovel*(i-1)+j);
+
     robo.u = -Kvd*([robo.Ttrans*robo.x(4:6);zeros(ell,1)]-vref)...
              +u(:,robo.const.ratiovel*(i-1)+j);
     Vrefworld(:,robo.const.ratiovel*(i-1)+j) =...

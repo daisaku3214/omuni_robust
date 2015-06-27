@@ -59,6 +59,19 @@ classdef omunirobot
                -sinq cosq 0;
                   0    0  1];
        end
+       function Tarray = Tarray(obj,theta,inputs)
+           sinq = sin(theta(1,:));
+           cosq = cos(theta(1,:));
+           length = size(theta,2);
+           Tarray = zeros(3,3);
+           for i = 1:length
+              Trans =  [cosq(i) -sinq(i) 0;
+                        sinq(i)  cosq(i) 0;
+                          0        0     1]; 
+              Tarray(:,i) = Trans*inputs(1:3,i);
+           end
+           
+       end
        function omega = calcomega(obj)
            theta_w = obj.x(3) + obj.para.alpha;
            sinqw = sin(theta_w);

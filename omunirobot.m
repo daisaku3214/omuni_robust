@@ -130,22 +130,24 @@ classdef omunirobot
 %            Rloss = - obj.const.wR*obj.x(7:end)
 %            Voltagedrive = obj.const.wB2*obj.u
            dx = [obj.x(4:6);wF1;wF2];
-           F = (obj.const.a_m.*sinqw.*obj.x(7:end)' - obj.const.c_m.*(...
-               sinqw*(dx(4)+obj.x(5)*obj.x(6))...
-               +cosqw*(-dx(5)+obj.x(4)*obj.x(6))...
-               -obj.para.r*dx(6))...
-               -2*(obj.para.d_m./obj.para.D_m).*(sinqw*obj.x(4)...
-               -cosqw*obj.x(5)-obj.para.r*obj.x(6)))';
+           dxq = -dx(5)+obj.x(4)*obj.x(6);
+           dyq = dx(4)+obj.x(5)*obj.x(6);
+           Fai = (obj.const.a_m.*obj.x(7:end)')';
+           Fcx = -(obj.const.c_m.*(sinqw*(dyq)+cosqw*(dxq)-obj.para.r*dx(6)))';
+           Fdx = -((obj.para.d_m./obj.para.D_m).*(sinqw*obj.x(4)...
+                -cosqw*obj.x(5)-obj.para.r*obj.x(6)))';
+            F = Fai+Fcx+Fdx;
        end
        function F = calcF(obj,dx)
            sinqw = sin(obj.x(3)+obj.para.alpha);
            cosqw = cos(obj.x(3)+obj.para.alpha);
-           F = (obj.const.a_m.*sinqw.*obj.x(7:end)' - obj.const.c_m.*(...
-               sinqw*(dx(4)+obj.x(5)*obj.x(6))...
-               +cosqw*(-dx(5)+obj.x(4)*obj.x(6))...
-               -obj.para.r*dx(6))...
-               -2*(obj.para.d_m./obj.para.D_m).*(sinqw*obj.x(4)...
-               -cosqw*obj.x(5)-obj.para.r*obj.x(6)))';
+           dxq = -dx(5)+obj.x(4)*obj.x(6);
+           dyq = dx(4)+obj.x(5)*obj.x(6);
+           Fai = (obj.const.a_m.*obj.x(7:end)')';
+           Fcx = -(obj.const.c_m.*(sinqw*(dyq)+cosqw*(dxq)-obj.para.r*dx(6)))';
+           Fdx = -((obj.para.d_m./obj.para.D_m).*(sinqw*obj.x(4)...
+                -cosqw*obj.x(5)-obj.para.r*obj.x(6)))';
+            F = Fai+Fcx+Fdx;
        end
        function obj = shiftx(obj)
            for i = 1:obj.const.ratiocir
@@ -158,6 +160,7 @@ classdef omunirobot
                obj.x = tempx + k3*obj.Deltat.simcir;
                [k4,Fk4] = obj.calcdx;
                obj.x = tempx + (k1+2*k2+2*k3+k4)*obj.Deltat.simcir/6;
+%                clc;disp([Fk1 Fk2 Fk3 Fk4]);
                obj.F = (Fk1+2*Fk2+2*Fk3+Fk4)/6;
            end
            obj.t = obj.t + obj.Deltat.simvel;

@@ -95,14 +95,15 @@ mA = [-mMAs;mMAc;mIAr];
 mAA = mM\mA;
 mAD = mM\mD;
 mR  = diag(R_m./L_m);
-wR  = mR;
+%wR  = mR;
 mB2 = diag(ones(1,ell)./L_m);
-wB2 = mB2;
+%wB2 = mB2;
 Komega = 2*G_m.*KE_m./(L_m.*D_m);
 mKx = Komega.*sin(alpha);
 mKy = Komega.*cos(alpha);
 mKq = Komega.*r;
 mK = [-mKx' mKy' mKq'];
+
 A = [mAD mAA;
       mK -mR];
 B = [zeros(3,ell);mB2];
@@ -137,17 +138,23 @@ end
 lambda = lambdatemp;
 clear lambdatemp;
 disp(rank([C;A-lambda]));
+clear lambda i k;
 
 
 parameter = struct('g',g,'ell',ell,'I0',I0,'m0',m0,'rgast',rgast,...
                    'thetagast',thetagast,'alpha',alpha,'r',r,...
                    'numi',numi,'R_m',R_m,'L_m',L_m,'KT_m',KT_m,...
                    'KE_m',KE_m,'JA_m',JA_m,'G_m',G_m,'eta_m',eta_m,...
-                   'D_m',D_m,'J_m',J_m,'m_m',m_m,'d_m',d_m,...
-                   'mu_m',mu_m,'ilim_m',ilim_m,'Vlim_m',Vlim_m);
+                   'D_m',D_m,'J_m',J_m,'m_m',m_m,'d_m',d_m,'cbeta',cbeta,...
+                   'rprim',rprim,'mu_m',mu_m,'ilim_m',ilim_m,'Vlim_m',Vlim_m);
 Deltat = struct('simcir',dt_simcir,'simvel',dt_simvel,'simpos',dt_simpos);
 sys = ss(A,B,C,D);
 dsys = c2d(sys,Deltat.simvel);
 Matrix = struct('A',A,'B',B,'dA',dsys.a,'dB',dsys.b);
+clear dsys sys sinalpha cosalpha alpha cbeta mB2 mD mR r C1 C2 ;
+clear Dc dc etac I I0 ilimc Gc JAc Jc KEc Komega KTc Lc M m0 mc muc...
+    numi rc Rc rgast thetagast ROT rprim Vlimc;
+clear -regexp mK mI mM _m mA;
+
 
 

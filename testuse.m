@@ -1,5 +1,5 @@
 close all;
-clear all;
+clear;
 robot_define;           %definition robot parameter
 control_define;         %definition contorol parameter
 robo = omunirobot(parameter,Deltat,Matrix,[p0;zeros(3+ell,1)],zeros(ell,1));

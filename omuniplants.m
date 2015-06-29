@@ -5,9 +5,9 @@ classdef omuniplants
        real;
    end
       methods
-       function obj = omuniplants(parameter,Deltat,x0,u0,numP)
+       function obj = omuniplants(parameter,Deltat,Matrix,x0,u0,numP)
            obj.numP = numP;
-           obj.nominal = omunirobot(parameter,Deltat,x0,u0);
+           obj.nominal = omunirobot(parameter,Deltat,Matrix,x0,u0);
            obj.real = obj.nominal;
            for i = 1:numP
              newreal = obj.nominal;

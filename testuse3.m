@@ -2,11 +2,11 @@ close all;
 clear all;
 robot_define;           %definition robot parameter
 control_define;         %definition contorol parameter
-robo = omunirobot(parameter,Deltat,[p0+diag([0.1 0.1 0.01])*randn(3,1);zeros(3+ell,1)],zeros(ell,1));
+robo = omunirobot(parameter,Deltat,Matrix,[p0+diag([0.01 0.01 0.001])*randn(3,1);zeros(3+ell,1)],zeros(ell,1));
 %input example:ramp input:move circle
-R = 2;
+R = 1;
 omega = 2*pi*1/8;
-phi0 = pi/4;
+phi0 = 1*pi/6;
 x0 = -R*cos(phi0);
 y0 = -R*sin(phi0);
 theta0 = 0;
@@ -93,7 +93,7 @@ for i = 1:(length)/robo.const.ratiovel
     xe = robo.x(1:3) - x(1:3,robo.const.ratiovel*(i-1)+j);
     vref = v(:,robo.const.ratiovel*(i-1)+j) + Kpd*([robo.Ttrans*xe;zeros(ell,1)]);
 
-    robo.u = -Kvd*([robo.Ttrans*robo.x(4:6);zeros(ell,1)]-vref)...
+    robo.u = -Kvd*([robo.Ttrans*robo.x(4:6);robo.x(7:end)]-vref)...
              +u(:,robo.const.ratiovel*(i-1)+j);
     Vrefworld(:,robo.const.ratiovel*(i-1)+j) =...
     [cos(x(3,robo.const.ratiovel*(i-1)+j)) -sin(x(3,robo.const.ratiovel*(i-1)+j)) 0;
@@ -196,6 +196,7 @@ for i = 1:3
 subplot(3,3,3+3*(i-1));
 plot(robo.Tlog,robo.Xlog(i,:)-x(i,:),'-b');
 hold on; grid on;
+plot([robo.Tlog(1,1) robo.Tlog(1,end)],zeros(1,2),'--m')
 xlim([0 time]);
     if i==1
         title('Robot posture error', 'interpreter', 'latex');

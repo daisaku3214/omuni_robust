@@ -13,6 +13,7 @@ classdef omunirobot
                 %size(u) = [para.ell 1];
        F;
        t;
+       sysMat;
    end
    properties(SetAccess = private, GetAccess = public)
        Deltat;
@@ -22,9 +23,10 @@ classdef omunirobot
        Tlog;
    end
    methods
-       function obj = omunirobot(parameter,Deltat,x0,u0)
+       function obj = omunirobot(parameter,Deltat,Matrix,x0,u0)
            obj.para = parameter;
            obj.Deltat = Deltat;
+           obj.sysMat = Matrix;
            a_m = 2*parameter.eta_m.*parameter.G_m.*parameter.KT_m./parameter.D_m;
            b_m = 2*(parameter.J_m+parameter.eta_m.*parameter.G_m.^2.*parameter.JA_m)./parameter.D_m;
            c_m = 2*b_m./parameter.D_m;
@@ -40,11 +42,12 @@ classdef omunirobot
                  parameter.r.*sin(parameter.alpha);
                  parameter.r.*cos(parameter.alpha)]);
            N = Hinv(:,1)*(parameter.m0+sum(parameter.m_m))*parameter.g;
+           ilim = min(abs(parameter.ilim_m));
            Vlim = min(abs(parameter.Vlim_m));
            obj.const = struct('a_m',a_m,'b_m',b_m,'c_m',c_m,'dD_m',dD_m,...
                               'Komega_m',Komega_m,'Ktheta_m',Ktheta_m,...
                               'wR',wR,'wB2',wB2,'wB',wB,'ratiocir',ratiocir,...
-                              'ratiovel',ratiovel,'N',N,'Vlim',Vlim);
+                              'ratiovel',ratiovel,'N',N,'ilim',ilim,'Vlim',Vlim);
            obj.x = x0;
            obj.u = u0;
            obj.t = 0;
@@ -79,6 +82,13 @@ classdef omunirobot
               Tarray(:,i) = Trans*inputs(1:3,i);
            end
            
+       end
+       function limitu = Vlimitation(obj,u)
+           if (max(abs(u)) > obj.const.Vlim)
+               limitu = obj.const.Vlim*u/max(abs(u));
+           else
+               limitu = u;
+           end
        end
        function omega = calcomega(obj)
            theta_w = obj.x(3) + obj.para.alpha;
@@ -171,9 +181,7 @@ classdef omunirobot
             F = Fai+Fcx+Fdx;
        end
        function obj = shiftx(obj)
-           if (max(abs(obj.u)) > obj.const.Vlim)
-               obj.u = obj.const.Vlim*obj.u/max(abs(obj.u));
-           end
+           obj.u = obj.Vlimitation(obj.u);
            for i = 1:obj.const.ratiocir
            tempx = obj.x;
                [k1,Fk1] = obj.calcdx;

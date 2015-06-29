@@ -8,8 +8,8 @@ dt_simvel =1e-3;%sampling time for velocity simulation
 dt_simpos =1e-2;%sampling time for position simulation
 g = 9.80665;    %[m/s^2] the Acceleration of gravity
 ell = 4;        %the number of motor
-I0 = 10;        %[kgm^2]    z-axis inertia of robot other than motor units
-m0 = 10;        %[kg]       mass of robot other than motor units
+I0 = 8;        %[kgm^2]    z-axis inertia of robot other than motor units
+m0 = 4;        %[kg]       mass of robot other than motor units
 rgast = 0;      %[m]        the radius between COM of robot and robot origin
 thetagast = 0;  %[rad]      the radian from x ast axis
 alpha = linspace(0,2*pi-2*pi/ell,ell);
@@ -23,19 +23,19 @@ numi = 0;       %the number of current sensor
 %motor unit definition
 %at this mode, all motor is same
 %this patteren, I will use RE35
-Rc = 0.314;     %[ohm]      The internal resistance of the nominal motor
-Lc = 0.085/1000;%[H]        The internal reactance of the nominal motor
-KTc = 19.4/1000;%[Nm/A]     The Torque constant of the nominal motor
-ROT = 491;      %[rpm/V]    The Rotational constant of the nominal motor
+Rc = 0.583;     %[ohm]      The internal resistance of the nominal motor
+Lc = 0.191/1000;%[H]        The internal reactance of the nominal motor
+KTc = 29.2/1000;%[Nm/A]     The Torque constant of the nominal motor
+ROT = 328;      %[rpm/V]    The Rotational constant of the nominal motor
 ROT=2*pi*ROT/60;%[rad/Vs]   The Rotational constant of the nominal motor
 KEc = 1/(ROT);  %[Vs/rad]   The Back electromotive force constanto of the nominal motor
-JAc = 68.1;     %[gcm^2]    The inertia of the rotor of the nominal motor
+JAc = 79.2;     %[gcm^2]    The inertia of the rotor of the nominal motor
 JAc =JAc/10^(7);%[kgm^2]    The inertia of the rotor of the nominal motor
-Gc =  50;       %           The ratio of gear
-etac = 0.9;     %           The efficiency of gear
-muc = 1.0;      %           The Coefficient of static friction
-ilimc = 10;     %[A]        the limit of motor current
-Vlimc = 10;     %[V]        the limit of input voltage
+Gc =  51;       %           The ratio of gear
+etac = 0.7;     %           The efficiency of gear
+muc = 0.8;      %           The Coefficient of static friction
+ilimc = 6;     %[A]        the limit of motor current
+Vlimc = 22;     %[V]        the limit of input voltage
 %this pattern, I use omni wheel of Diameter 200mm
 Dc = 0.4;       %[m]        The dirmeter of omni wheel
 Jc = 1;      %[kgm^2]    The inertia of the omni whell
@@ -146,3 +146,4 @@ parameter = struct('g',g,'ell',ell,'I0',I0,'m0',m0,'rgast',rgast,...
                    'D_m',D_m,'J_m',J_m,'m_m',m_m,'d_m',d_m,...
                    'mu_m',mu_m,'ilim_m',ilim_m,'Vlim_m',Vlim_m);
 Deltat = struct('simcir',dt_simcir,'simvel',dt_simvel,'simpos',dt_simpos);
+Matrix = struct('A',A,'B',B);

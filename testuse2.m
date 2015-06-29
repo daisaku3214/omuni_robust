@@ -2,7 +2,7 @@ close all;
 clear all;
 robot_define;           %definition robot parameter
 control_define;         %definition contorol parameter
-robo = omunirobot(parameter,Deltat,[p0;zeros(3+ell,1)],zeros(ell,1));
+robo = omunirobot(parameter,Deltat,Matrix,[p0;zeros(3+ell,1)],zeros(ell,1));
 %input example:ramp input:move circle
 u1 = v2omega*[-pi/4*2 0 -pi/4]';
 v1 = [-pi/4*2 0 -pi/4 zeros(1,ell)]';

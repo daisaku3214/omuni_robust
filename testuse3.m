@@ -35,30 +35,30 @@ theta4 = theta3(end)*ones(1,times(4)/time*length);
 x4 = x0 + R*cos(theta4+phi0);
 y4 = y0 + R*sin(theta4+phi0);
 
-% x = [x1 x2 x3 x4;
-%      y1 y2 y3 y4;
-%      theta1 theta2 theta3 theta4;
-%      zeros(ell,length)];
-% v1 = [-omega*R*sin(phi0) omega*R*cos(phi0) omega]';
-% u1 = v2omega*v1; u = u1*[lamp1 step1 lamp2 step2];
-% u = [u u(:,end)];
-% v = v1*[lamp1 step1 lamp2 step2];
-% v = [v;zeros(ell,length)];
-% Vrefworld = zeros(3,length);
-% x = [x x(:,end)];
-
 x = [x1 x2 x3 x4;
      y1 y2 y3 y4;
-     zeros(1,length);
+     theta1 theta2 theta3 theta4;
      zeros(ell,length)];
-v1 = [-omega*R*sin(phi0) omega*R*cos(phi0) 0]';
-v = v1*[lamp1 step1 lamp2 step2];
-v = robo.Tarray([theta1 theta2 theta3 theta4],v);
-u = v2omega*v;
+v1 = [-omega*R*sin(phi0) omega*R*cos(phi0) omega]';
+u1 = v2omega*v1; u = u1*[lamp1 step1 lamp2 step2];
 u = [u u(:,end)];
+v = v1*[lamp1 step1 lamp2 step2];
 v = [v;zeros(ell,length)];
 Vrefworld = zeros(3,length);
 x = [x x(:,end)];
+
+% x = [x1 x2 x3 x4;
+%      y1 y2 y3 y4;
+%      zeros(1,length);
+%      zeros(ell,length)];
+% v1 = [-omega*R*sin(phi0) omega*R*cos(phi0) 0]';
+% v = v1*[lamp1 step1 lamp2 step2];
+% v = robo.Tarray([theta1 theta2 theta3 theta4],v);
+% u = v2omega*v;
+% u = [u u(:,end)];
+% v = [v;zeros(ell,length)];
+% Vrefworld = zeros(3,length);
+% x = [x x(:,end)];
 
 %input example:ramp input:move linear
 % times = [1 1 1 1 1 1 1 1];     %[sec] the time of input shaping

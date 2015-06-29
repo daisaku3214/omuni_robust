@@ -146,4 +146,8 @@ parameter = struct('g',g,'ell',ell,'I0',I0,'m0',m0,'rgast',rgast,...
                    'D_m',D_m,'J_m',J_m,'m_m',m_m,'d_m',d_m,...
                    'mu_m',mu_m,'ilim_m',ilim_m,'Vlim_m',Vlim_m);
 Deltat = struct('simcir',dt_simcir,'simvel',dt_simvel,'simpos',dt_simpos);
-Matrix = struct('A',A,'B',B);
+sys = ss(A,B,C,D);
+dsys = c2d(sys,Deltat.simvel);
+Matrix = struct('A',A,'B',B,'dA',dsys.a,'dB',dsys.b);
+
+

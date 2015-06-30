@@ -65,7 +65,7 @@ for i = 1:(length)/robo.const.ratiovel
     robo = robo.shiftx;
     xe = robo.x(1:3) - p(1:3,robo.const.ratiovel*(i-1)+j);
     vast = robo.Ttrans*v(:,robo.const.ratiovel*(i-1)+j);
-    vref = [vast;zeros(ell,1)] + Kpd*([robo.Ttrans*xe;zeros(ell,1)]);
+    vref = [vast;zeros(ell,1)] + Kpd*([robo.Ttrans*xe;robo.x(7:end,1)]);
 
     robo.u = -Kvd*([robo.Ttrans*robo.x(4:6);robo.x(7:end)]-vref)...
              +v2omega*vast;

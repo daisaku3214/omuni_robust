@@ -31,8 +31,8 @@ classdef TRA_circle
            p = [x;y;theta];
        end
        function v = v(obj,s,vs)
-           vx = -obj.R*vs*sin(s+obj.phi0);
-           vy = obj.R*vs*cos(s+obj.phi0);
+           vx = -obj.R.*vs.*sin(s+obj.phi0);
+           vy = obj.R.*vs.*cos(s+obj.phi0);
            vtheta = obj.alpha*vs;
            v = [vx;vy;vtheta];
        end

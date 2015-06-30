@@ -24,13 +24,9 @@ function [p,v,t] = calc_ref(tra,ss,se,vs,as,dt)
         vsa = [vs1 vs2];
         sa = [s1 s2];
     end
-    p = zeros(3,size(ta,2));
-    v = zeros(3,size(ta,2));
     t =ta;
-    for i = 1:size(ta,2)
-        p(:,i) = tra.p(sa(i));
-        v(:,i) = tra.v(sa(i),vsa(i));
-    end
+    p = tra.p(sa);
+    v = tra.v(sa,vsa);
 end
 %0 < t < t1
 %ds = as*t

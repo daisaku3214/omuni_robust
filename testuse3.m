@@ -4,85 +4,50 @@ robot_define;           %definition robot parameter
 control_define;         %definition contorol parameter
 robo = omunirobot(parameter,Deltat,Matrix,[p0+diag([0.01 0.01 0.001])*randn(3,1);zeros(3+ell,1)],zeros(ell,1));
 %input example:ramp input:move circle
-R = 1;
-omega = 2*pi*1/8;
-phi0 = 1*pi/6;
-x0 = -R*cos(phi0);
-y0 = -R*sin(phi0);
-theta0 = 0;
+% R = 10;
+% omega = -pi/10;
+% phi0 = -pi/6;
+% x0 = R*cos(phi0);
+% y0 = R*sin(phi0);
+% theta0 = 0;
+% angle = -4;
+% tra = TRA_circle(R,x0,y0,theta0,pi+phi0,angle);
+%[p,v,t] = calc_ref(tra,0,-pi/10,omega,omega,dt_simvel);
 
-times = [1 7 1 1];     %[sec] the time of input shaping
-time = sum(times);      %[sec] simuration time
-length = time/Deltat.simvel;
-lamp1 = linspace(0,1,times(1)/time*length);
-step1 = ones(1,times(2)/time*length);
-lamp2 = linspace(1,0,times(3)/time*length);
-step2 = zeros(1,times(4)/time*length);
-tlamp1 = linspace(0,times(1),times(1)/time*length);
-theta1 = 0.5*omega/(times(1)).*(tlamp1-0).^2 + theta0;
-x1 = x0 + R*cos(theta1+phi0);
-y1 = y0 + R*sin(theta1+phi0);
-tstep1 = linspace(times(1)+Deltat.simvel,times(1)+times(2),times(2)/time*length);
-theta2 = omega*(tstep1-times(1))+ theta1(end);
-x2 = x0 + R*cos(theta2+phi0);
-y2 = y0 + R*sin(theta2+phi0);
-tlamp2 = linspace(times(1)+times(2)+Deltat.simvel,times(1)+times(2)+times(3),times(3)/time*length);
-theta3 = omega.*(tlamp2-times(2)-times(1))-0.5*omega/(times(3)).*(tlamp2-times(2)-times(1)).^2 + theta2(end);
-x3 = x0 + R*cos(theta3+phi0);
-y3 = y0 + R*sin(theta3+phi0);
-tstep2 = linspace(times(1)+times(2)+times(3)+Deltat.simvel,times(1)+times(2)+times(3)+times(4),times(4)/time*length);
-theta4 = theta3(end)*ones(1,times(4)/time*length);
-x4 = x0 + R*cos(theta4+phi0);
-y4 = y0 + R*sin(theta4+phi0);
+angle = pi/10;
+phi1 = 0;
+phi2 = 5*pi/4;
+phi3 = pi/2;
+se = 4;
+vratio = 4;
+accraito = 1;
+se1 = se;
+se2 = se*sqrt(2);
+se3 = se;
+vs1 = se1/vratio;
+vs2 = se2/vratio;
+vs3 = se3/vratio;
 
-x = [x1 x2 x3 x4;
-     y1 y2 y3 y4;
-     theta1 theta2 theta3 theta4;
-     zeros(ell,length)];
-v1 = [-omega*R*sin(phi0) omega*R*cos(phi0) omega]';
-u1 = v2omega*v1; u = u1*[lamp1 step1 lamp2 step2];
-u = [u u(:,end)];
-v = v1*[lamp1 step1 lamp2 step2];
-v = [v;zeros(ell,length)];
-Vrefworld = zeros(3,length);
-x = [x x(:,end)];
+tra1 = TRA_line(0,0,0,phi1,angle);
+tra2 = TRA_line(se1*cos(phi1),se1*sin(phi1),0,phi2,angle);
+tra3 = TRA_line(se1*cos(phi1)+se2*cos(phi2),se1*sin(phi1)+se2*sin(phi2),0,phi3,angle);
+[p1,v1,t1] = calc_ref(tra1,0,se1,vs1,vs1/accraito,dt_simvel);
+[p2,v2,t2] = calc_ref(tra2,0,se2,vs2,vs2/accraito,dt_simvel);
+[p3,v3,t3] = calc_ref(tra3,0,se3,vs3,vs3/accraito,dt_simvel);
+p = [p1 p2 p3];
+v = [v1 v2 v3];
+t = [t1 t1(end)+t2 t1(end)+t2(end)+t3];
 
-% x = [x1 x2 x3 x4;
-%      y1 y2 y3 y4;
-%      zeros(1,length);
-%      zeros(ell,length)];
-% v1 = [-omega*R*sin(phi0) omega*R*cos(phi0) 0]';
-% v = v1*[lamp1 step1 lamp2 step2];
-% v = robo.Tarray([theta1 theta2 theta3 theta4],v);
-% u = v2omega*v;
-% u = [u u(:,end)];
-% v = [v;zeros(ell,length)];
-% Vrefworld = zeros(3,length);
-% x = [x x(:,end)];
-
-%input example:ramp input:move linear
-% times = [1 1 1 1 1 1 1 1];     %[sec] the time of input shaping
-% time = sum(times);      %[sec] simuration time
-% length = time/Deltat.simvel;
-% u1 = v2omega*[2 0 0]';
-% u2 = v2omega*[-2 -2 0]';
-% v1 = [2 0 0 zeros(1,ell)]';
-% v2 = [-2 -2 0 zeros(1,ell)]';
-% lamp1 = linspace(0,1,times(1)/time*length);
-% step1 = ones(1,times(2)/time*length);
-% lamp2 = linspace(1,0,times(3)/time*length);
-% step2 = zeros(1,times(4)/time*length);
-% lamp3 = linspace(0,1,times(5)/time*length);
-% step3 = ones(1,times(6)/time*length);
-% lamp4 = linspace(1,0,times(7)/time*length);
-% step4 = zeros(1,times(8)/time*length);
-% u = [u1*[lamp1 step1 lamp2 step2] u2*[lamp3 step3 lamp4 step4]];
-% v = [v1*[lamp1 step1 lamp2 step2] v2*[lamp3 step3 lamp4 step4]];
-
+time = t(end);
+length = size(t,2);
+u = v2omega*[cos(p(3,1)) -sin(p(3,1)) 0;-sin(p(3,1)) cos(p(3,1)) 0; 0 0 1]*v(:,1);
+for i = 1:length-1;
+u = [u v2omega*[cos(p(3,i)) -sin(p(3,i)) 0;-sin(p(3,i)) cos(p(3,i)) 0; 0 0 1]*v(:,i)];
+end
 figure;
 for i = 1:(length)/robo.const.ratiovel
     %plot trajectory
-    plot(x(1,:),x(2,:),'--c');
+    plot(p(1,:),p(2,:),'--c');
     hold on;
     plot(robo.Xlog(1,:),robo.Xlog(2,:),'m');
     %plot robot posture
@@ -90,19 +55,21 @@ for i = 1:(length)/robo.const.ratiovel
     drawnow;
     for j = 1:robo.const.ratiovel
     robo = robo.shiftx;
-    xe = robo.x(1:3) - x(1:3,robo.const.ratiovel*(i-1)+j);
-    vref = v(:,robo.const.ratiovel*(i-1)+j) + Kpd*([robo.Ttrans*xe;zeros(ell,1)]);
+    xe = robo.x(1:3) - p(1:3,robo.const.ratiovel*(i-1)+j);
+    vast = robo.Ttrans*v(:,robo.const.ratiovel*(i-1)+j);
+    vref = [vast;zeros(ell,1)] + Kpd*([robo.Ttrans*xe;zeros(ell,1)]);
 
     robo.u = -Kvd*([robo.Ttrans*robo.x(4:6);robo.x(7:end)]-vref)...
-             +u(:,robo.const.ratiovel*(i-1)+j);
+             +v2omega*vast;
+
     Vrefworld(:,robo.const.ratiovel*(i-1)+j) =...
-    [cos(x(3,robo.const.ratiovel*(i-1)+j)) -sin(x(3,robo.const.ratiovel*(i-1)+j)) 0;
-    sin(x(3,robo.const.ratiovel*(i-1)+j)) cos(x(3,robo.const.ratiovel*(i-1)+j)) 0;
+    [cos(p(3,robo.const.ratiovel*(i-1)+j)) -sin(p(3,robo.const.ratiovel*(i-1)+j)) 0;
+    sin(p(3,robo.const.ratiovel*(i-1)+j)) cos(p(3,robo.const.ratiovel*(i-1)+j)) 0;
     0 0 1]*v(1:3,robo.const.ratiovel*(i-1)+j);
     end
 end
 %%
-makemoviefromomunirobot_withref(robo,limit,x,'movieK22deg');
+makemoviefromomunirobot_withref(robo,limit,p,'movieK22deg');
 %%
 %plot grip force
 hfin = figure;
@@ -139,7 +106,7 @@ for i = 1:ell
 subplot(ell,3,3+3*(i-1));
 plot(robo.Tlog,robo.Ulog(i,:),'-b');
 hold on;grid on;
-plot(robo.Tlog,u(i,:),'--m');
+plot(t,u(i,:),'--m');
 xlim([0 time]);
 ylabel(strcat(strcat('$$V_',num2str(i)),'[V]$$'), 'interpreter', 'latex');
 end
@@ -154,7 +121,7 @@ for i = 1:3
 subplot(3,3,1+3*(i-1));
 plot(robo.Tlog,robo.Xlog(i,:),'-b');
 hold on; grid on;
-plot(robo.Tlog,x(i,:),'--m')
+plot(t,p(i,:),'--m')
 xlim([0 time]);
     if i==1
         title('Robot posture', 'interpreter', 'latex');
@@ -176,7 +143,7 @@ for i = 1:3
 subplot(3,3,2+3*(i-1));
 plot(robo.Tlog,robo.Xlog(3+i,:),'-b');
 hold on; grid on;
-plot(robo.Tlog,[0 Vrefworld(i,:)],'--m')
+plot(t, v(i,:),'--m')
 xlim([0 time]);
     if i==1
         title('Robot velosity at world', 'interpreter', 'latex');
@@ -190,11 +157,13 @@ xlim([0 time]);
     end
 end
 xlabel('time [sec]');
-
+num1 = size(robo.Tlog,2);
+num2 = size(p,2);
+num = min(num1,num2);
 %plot robot posture error
 for i = 1:3
 subplot(3,3,3+3*(i-1));
-plot(robo.Tlog,robo.Xlog(i,:)-x(i,:),'-b');
+plot(robo.Tlog,robo.Xlog(i,1:num)-p(i,1:num),'-b');
 hold on; grid on;
 plot([robo.Tlog(1,1) robo.Tlog(1,end)],zeros(1,2),'--m')
 xlim([0 time]);

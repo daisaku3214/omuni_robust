@@ -76,8 +76,8 @@ classdef omunirobot
            length = size(theta,2);
            Tarray = zeros(3,3);
            for i = 1:length
-              Trans =  [cosq(i) -sinq(i) 0;
-                        sinq(i)  cosq(i) 0;
+              Trans =  [cosq(i) sinq(i) 0;
+                        -sinq(i)  cosq(i) 0;
                           0        0     1]; 
               Tarray(:,i) = Trans*inputs(1:3,i);
            end

@@ -5,6 +5,13 @@ control_define;         %definition contorol parameter
 robo = omunirobot(parameter,Deltat,Matrix,[p0+[0;0.01;0.01];zeros(3+ell,1)],zeros(ell,1));
 tsta = 1.6820;   %[sec]
 stanum = tsta/Deltat.simvel;
+Q = diag([1000 1000 5000 100 100 500 0.001*ones(1,ell)]);
+R = diag([0.01*ones(1,ell)]);
+Aall = [zeros(3,3) eye(3,3) zeros(3,ell);
+       zeros(3+ell,3) A];
+Ball = [zeros(3,ell);B];
+Kd = lqrd(Aall,Ball,Q,R,dt_simvel);
+
 %input example:ramp input:move circle
 R = 2;
 omega = -2*pi/7.5;
@@ -75,11 +82,7 @@ for i = 1:(length)/robo.const.ratiovel
     vast = Ttrans*v(:,robo.const.ratiovel*(i-1)+j);
     xe =  Ttrans*(robo.x(1:3) - p(1:3,robo.const.ratiovel*(i-1)+j));
     ve =  Ttrans*robo.x(4:6) - vast;
-    vref = [vast;zeros(ell,1)] + Kpd*([xe;ve;robo.x(7:end,1)]);
-    vref = [v_rev(vref(1:3,1),Deltat.simvel);vref(4:end)];
-
-    robo.u = -Kvd*([robo.Ttrans*robo.x(4:6);robo.x(7:end)]-vref)...
-             +u(:,robo.const.ratiovel*(i-1)+j);
+    robo.u = -Kd*([xe;ve;robo.x(7:end)])+u(:,robo.const.ratiovel*(i-1)+j);
     end
 end
 %%

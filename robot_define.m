@@ -3,44 +3,66 @@
 %this file is definition of robot parameter
 %%
 %common definition
-dt_simcir =1e-4;%sampling time for circuit equation
-dt_simvel =1e-3;%sampling time for velocity simulation
-dt_simpos =1e-2;%sampling time for position simulation
-g = 9.80665;    %[m/s^2] the Acceleration of gravity
-ell = 4;        %the number of motor
-I0 = 8;        %[kgm^2]    z-axis inertia of robot other than motor units
-m0 = 4;        %[kg]       mass of robot other than motor units
-rgast = 0;      %[m]        the radius between COM of robot and robot origin
-thetagast = 0;  %[rad]      the radian from x ast axis
+dt_simcir =1e-4;    %sampling time for circuit equation
+dt_simvel =1e-3;    %sampling time for velocity simulation
+dt_simpos =1e-2;    %sampling time for position simulation
+g = 9.80665;        %[m/s^2] the Acceleration of gravity
+ell = 4;            %the number of motor
+I0 = 6;             %[kgm^2]    z-axis inertia of robot other than motor units
+m0 = 20;             %[kg]       mass of robot other than motor units
+rgast = 0.25;       %[m]        the radius between COM of robot and robot origin
+thetagast = pi/4;   %[rad]      the radian from x ast axis
 alpha = linspace(0,2*pi-2*pi/ell,ell);
-rc = 0.5;       %[m]        the radius between omni wheel and robot origin
+rc = 0.5;           %[m]        the radius between omni wheel and robot origin
 r = rc*ones(1,ell);
 rprim = sqrt(rgast^2.+r.^2 -2*rgast.*r.*cos(thetagast-alpha));
 cbeta = (rprim./r + r./rprim -rgast.^2./(r.*rprim))/2;
-numi = 0;       %the number of current sensor
+%sensor definition
+num_i = 0;          %the number of current sensor
+num_mring = 0;      %the number of measurement rings
+num_jairo = 1;      %the number of jairo sensor
+num_taco = ell;     %the number of taco meter by rotary encorder
+num_LRF = 1;        %the number of LRF sensor
+idynac = 1024;      %[bit] the bit number of current sensor
+irangec = [-10 10]; %[A]   the dynamic range of current sensor
+mringDc = 0.01;     %[m]   the diameter of measurement rings
+mringc=2*pi/(4*100);%[bit/rad] the convet constants rad to bit
+mring_alpha=[0 pi/4];%[rad] the place of measurment rings
+mringrc = [0.5 0.5];%[m] the place of measurment rings
+mring_dir = [0 pi/4];%[rad] the direction of mesurement rings
+jairodynac=1024;    %[bit] the bit number of jairo sensor
+jairorangec=[-10 10];%[rad/sec] the dynamic range of jairo sensor
+tacoc=2*pi/(4*1024);%[bit/rad] the convet constants rad to bit
+LRF_dt=dt_simpos;   %[sec] the sampling time of LRF
+LRFnoise =diag([100 100 pi]);%the Variance-covariance matrix of LRF noise
 
 %%
 %motor unit definition
 %at this mode, all motor is same
-%this patteren, I will use RE35
-Rc = 0.583;     %[ohm]      The internal resistance of the nominal motor
-Lc = 0.191/1000;%[H]        The internal reactance of the nominal motor
-KTc = 29.2/1000;%[Nm/A]     The Torque constant of the nominal motor
-ROT = 328;      %[rpm/V]    The Rotational constant of the nominal motor
-ROT=2*pi*ROT/60;%[rad/Vs]   The Rotational constant of the nominal motor
-KEc = 1/(ROT);  %[Vs/rad]   The Back electromotive force constanto of the nominal motor
-JAc = 79.2;     %[gcm^2]    The inertia of the rotor of the nominal motor
-JAc =JAc/10^(7);%[kgm^2]    The inertia of the rotor of the nominal motor
-Gc =  51;       %           The ratio of gear
-etac = 0.7;     %           The efficiency of gear
-muc = 0.8;      %           The Coefficient of static friction
-ilimc = 6;     %[A]        the limit of motor current
-Vlimc = 22;     %[V]        the limit of input voltage
-%this pattern, I use omni wheel of Diameter 200mm
-Dc = 0.4;       %[m]        The dirmeter of omni wheel
-Jc = 1;      %[kgm^2]    The inertia of the omni whell
-mc = 1.5;       %[kg]       The mass of a motor unit
-dc = 0.01;       %[Nm/sec]    The declease ratio
+%this patteren, I will use RE40 with 203113(1:3.5,eta = 90%)
+Rc = 0.299;         %[ohm]      The internal resistance of the nominal motor
+Lc = 0.0823/1000;   %[H]        The internal reactance of the nominal motor
+KTc = 30.2/1000;    %[Nm/A]     The Torque constant of the nominal motor
+ROT = 317;          %[rpm/V]    The Rotational constant of the nominal motor
+ROT=2*pi*ROT/60;    %[rad/Vs]   The Rotational constant of the nominal motor
+KEc = 1/(ROT);      %[Vs/rad]   The Back electromotive force constanto of the nominal motor
+JAc = 142;          %[gcm^2]    The inertia of the rotor of the nominal motor
+JAc =JAc/10^(7);    %[kgm^2]    The inertia of the rotor of the nominal motor
+JGhc = 20+9.1;      %[gcm^2]    The inertia of the gear-head
+JGhc = JGhc/10^(7); %[kgm^2]    The inertia of the gear-head
+Gghc = 4.8;          %           The ratio of gear-head
+Gcupc = 2.1;        %           The ratio of cuppring gear
+Gc =  Gghc*Gcupc;    %           The ratio of gear
+etac = 0.9*0.8;     %           The efficiency of gear
+muc = 0.8;          %           The Coefficient of static friction
+ilimc = 10;         %[A]        the limit of motor current
+Vlimc = 22;         %[V]        the limit of input voltage
+%this pattern, I use omni wheel of Diameter 185mm
+Dc = 0.170;         %[m]        The dirmeter of omuni wheel
+hc = 0.045;         %[m]        The width of omuni wheel
+Jc = 0.213;         %[kgm^2]    The inertia of the omni whell
+mc = 1.5;           %[kg]       The mass of a motor unit
+dc = 0.01;          %[Nm/sec]    The declease ratio
 
 R_m = Rc*ones(1,ell);
 L_m = Lc*ones(1,ell);
@@ -50,7 +72,8 @@ JA_m = JAc*ones(1,ell);
 G_m = Gc*ones(1,ell);
 eta_m = etac*ones(1,ell);
 D_m = Dc*ones(1,ell);
-J_m = Jc*ones(1,ell);
+h_m = hc*ones(1,ell);
+J_m = (Jc+Gcupc^2*JGhc)*ones(1,ell);
 m_m = mc*ones(1,ell);
 d_m = dc*ones(1,ell);
 mu_m = muc*ones(1,ell);
@@ -59,6 +82,17 @@ Vlim_m=Vlimc*ones(1,ell);
 
 M = m0 + sum(m_m);
 I = I0 + sum(rprim.^2.*m_m);
+%%
+%define of uncertain
+unnum_m = 10;       %the number of uncertain parameters by motor
+unnum_o = 1;        %the number of unsertain parameters by other motor
+unnum = ell*unnum_m...
+      + unnum_o;    %the number of uncertain parameters
+ungainnom = 1;
+ungainper = [-20 20];
+for i=1:ell
+
+end
 %%
 sinalpha = sin(alpha);
 cosalpha = cos(alpha);
@@ -110,11 +144,12 @@ B = [zeros(3,ell);mB2];
 
 C1 = [0 0 1 zeros(1,ell);
        (2*sinalpha./D_m)' -(2*cosalpha./D_m)' -(2*rc./D_m)' zeros(ell,ell)];
-C2 = [zeros(numi,3) eye(numi,ell)];
+C2 = [zeros(num_i,3) eye(num_i,ell)];
 C = [C1;C2];
 D = zeros(size(C,1),ell);
 v2omega = C1(2:ell+1,1:3);
 omega2v = pinv(v2omega);
+omega2Vol = diag(KE_m.*G_m);
 
 
 %Determining whether controllable
@@ -143,9 +178,9 @@ clear lambda i k;
 
 parameter = struct('g',g,'ell',ell,'I0',I0,'m0',m0,'rgast',rgast,...
                    'thetagast',thetagast,'alpha',alpha,'r',r,...
-                   'numi',numi,'R_m',R_m,'L_m',L_m,'KT_m',KT_m,...
-                   'KE_m',KE_m,'JA_m',JA_m,'G_m',G_m,'eta_m',eta_m,...
-                   'D_m',D_m,'J_m',J_m,'m_m',m_m,'d_m',d_m,'cbeta',cbeta,...
+                   'num_i',num_i,'R_m',R_m,'L_m',L_m,'KT_m',KT_m,'KE_m',KE_m,...
+                   'JA_m',JA_m,'G_m',G_m,'eta_m',eta_m,'D_m',D_m,'h_m',h_m,...
+                   'J_m',J_m,'m_m',m_m,'d_m',d_m,'cbeta',cbeta,...
                    'rprim',rprim,'mu_m',mu_m,'ilim_m',ilim_m,'Vlim_m',Vlim_m);
 Deltat = struct('simcir',dt_simcir,'simvel',dt_simvel,'simpos',dt_simpos);
 sys = ss(A,B,C,D);

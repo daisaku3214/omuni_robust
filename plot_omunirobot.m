@@ -1,5 +1,5 @@
 function plot_omunirobot(omunirobot,limit)
-tirewidth = omunirobot.para.D_m/20;
+tirewidth = omunirobot.para.h_m;
 dir = mean(omunirobot.para.r)*[cos(omunirobot.x(3));sin(omunirobot.x(3))];
 tiredir = [cos(omunirobot.para.alpha + omunirobot.x(3));...
            sin(omunirobot.para.alpha + omunirobot.x(3))];

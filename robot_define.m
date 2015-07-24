@@ -4,8 +4,8 @@
 %%
 %common definition
 dt_simcir =1e-4;    %sampling time for circuit equation
-dt_simvel =1e-3;    %sampling time for velocity simulation
-dt_simpos =1e-2;    %sampling time for position simulation
+dt_simvel =5e-3;    %sampling time for velocity simulation
+dt_simpos =2.5e-2;    %sampling time for position simulation
 g = 9.80665;        %[m/s^2] the Acceleration of gravity
 ell = 4;            %the number of motor
 I0 = 6;             %[kgm^2]    z-axis inertia of robot other than motor units
@@ -19,23 +19,31 @@ rprim = sqrt(rgast^2.+r.^2 -2*rgast.*r.*cos(thetagast-alpha));
 cbeta = (rprim./r + r./rprim -rgast.^2./(r.*rprim))/2;
 %sensor definition
 num_i = 0;          %the number of current sensor
-num_mring = 0;      %the number of measurement rings
+num_mring = 2;      %the number of measurement rings
 num_jairo = 1;      %the number of jairo sensor
 num_taco = ell;     %the number of taco meter by rotary encorder
 num_LRF = 1;        %the number of LRF sensor
 idynac = 1024;      %[bit] the bit number of current sensor
 irangec = [-10 10]; %[A]   the dynamic range of current sensor
-mringDc = 0.01;     %[m]   the diameter of measurement rings
-mringc=2*pi/(4*100);%[bit/rad] the convet constants rad to bit
-mring_alpha=[0 pi/4];%[rad] the place of measurment rings
-mringrc = [0.5 0.5];%[m] the place of measurment rings
-mring_dir = [0 pi/4];%[rad] the direction of mesurement rings
+mringDc = 0.08;     %[m]   the diameter of measurement rings
+mringc=2*pi/(4*100)...
+ *ones(1,num_mring);%[rad/bit] the convert constants rad to bit
+mring_alpha=[0 pi/2];%[rad] the place of measurment rings
+mringrc = [0.1 0.1];%[m] the place of measurment rings
+mring_dir = [0 pi/2];%[rad] the direction of mesurement rings
 jairodynac=1024;    %[bit] the bit number of jairo sensor
-jairorangec=[-10 10];%[rad/sec] the dynamic range of jairo sensor
-tacoc=2*pi/(4*1024);%[bit/rad] the convet constants rad to bit
+jairorangec=[-2 2];%[rad/sec] the dynamic range of jairo sensor
+jairoc = (jairorangec(2)-jairorangec(1))/jairodynac;
+                    %[rad/sec.bit] the convert constans rad/s to bit
+jairozero = jairodynac/2;%[bit]the zero point at jairo
+tacoc=2*pi/(4*500)...
+  *ones(1,num_taco);%[bit/rad] the convet constants rad to bit
 LRF_dt=dt_simpos;   %[sec] the sampling time of LRF
-LRFnoise =diag([100 100 pi]);%the Variance-covariance matrix of LRF noise
-
+LRFnoise = 0.0001*diag([1 1 pi]);%the Variance-covariance matrix of LRF noise
+ENCnoise = 0.000001*diag([1 1 pi]);%the Variance-covariance matrix of encorder noise
+TACnoise = 0.000001*diag([1 1 pi]); %the Variance-covariance matrix of tacometer noise
+JROnoise = 0.000001; %the covariansce of jairo noise
+JROoff = 1e-9;%[rad] the offset noise ratio of jairo
 %%
 %motor unit definition
 %at this mode, all motor is same
@@ -54,7 +62,7 @@ Gghc = 4.8;          %           The ratio of gear-head
 Gcupc = 2.1;        %           The ratio of cuppring gear
 Gc =  Gghc*Gcupc;    %           The ratio of gear
 etac = 0.9*0.8;     %           The efficiency of gear
-muc = 0.8;          %           The Coefficient of static friction
+muc = 0.4;          %           The Coefficient of static friction
 ilimc = 10;         %[A]        the limit of motor current
 Vlimc = 22;         %[V]        the limit of input voltage
 %this pattern, I use omni wheel of Diameter 185mm
@@ -93,6 +101,11 @@ ungainper = [-20 20];
 for i=1:ell
 
 end
+unLRF = LRFnoise;%the uncertain conversion matrix of LRF
+unENC = ENCnoise;%the uncertain conversion matrix of encoder
+unTAC = TACnoise;%the uncertain conversion matrix of tacometer
+unJRO = JROnoise;%the uncertain of jairo
+unJROoff=JROoff; %the uncertain of jairo offset
 %%
 sinalpha = sin(alpha);
 cosalpha = cos(alpha);
@@ -125,8 +138,8 @@ mM = [1-mMCss mMCsc mMCrs-rgast*sin(thetagast);
 mD = [ mMDss -mMDsc -mMDrs;
      -mMDsc  mMDcc  mMDrc;
      -mIDbs  mIDbc  mIDbr];
-mA = [-mMAs;mMAc;mIAr];
-mAA = mM\mA;
+mAi = [-mMAs;mMAc;mIAr];
+mAA = mM\mAi;
 mAD = mM\mD;
 mR  = diag(R_m./L_m);
 %wR  = mR;
@@ -176,6 +189,7 @@ disp(rank([C;A-lambda]));
 clear lambda i k;
 
 
+%%
 parameter = struct('g',g,'ell',ell,'I0',I0,'m0',m0,'rgast',rgast,...
                    'thetagast',thetagast,'alpha',alpha,'r',r,...
                    'num_i',num_i,'R_m',R_m,'L_m',L_m,'KT_m',KT_m,'KE_m',KE_m,...
@@ -183,6 +197,13 @@ parameter = struct('g',g,'ell',ell,'I0',I0,'m0',m0,'rgast',rgast,...
                    'J_m',J_m,'m_m',m_m,'d_m',d_m,'cbeta',cbeta,...
                    'rprim',rprim,'mu_m',mu_m,'ilim_m',ilim_m,'Vlim_m',Vlim_m);
 Deltat = struct('simcir',dt_simcir,'simvel',dt_simvel,'simpos',dt_simpos);
+sensparas = struct('num_i',num_i,'num_mring',num_mring,'num_jairo',num_jairo,...
+          'num_taco',num_taco,'num_LRF',num_LRF,'idynac',idynac,'irangec',irangec,...
+          'mringDc',mringDc,'mringc',mringc,'mring_alpha',mring_alpha,...
+          'mringrc',mringrc,'mring_dir',mring_dir,'jairodynac',jairodynac,'jairozero',jairozero,...
+          'jairorangec',jairorangec,'jairoc',jairoc,'tacoc',tacoc,'LRF_dt',LRF_dt);
+Uncertain = struct('unnum',unnum,'unLRF',unLRF,'unENC',unENC,'unJRO',unJRO,...
+           'unJROoff',unJROoff,'unTAC',unTAC);
 sys = ss(A,B,C,D);
 dsys = c2d(sys,Deltat.simvel);
 Matrix = struct('A',A,'B',B,'dA',dsys.a,'dB',dsys.b);

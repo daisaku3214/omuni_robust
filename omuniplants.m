@@ -4,7 +4,7 @@ classdef omuniplants
        nominal;
        real;
    end
-      methods
+   methods
        function obj = omuniplants(parameter,Deltat,Matrix,x0,u0,numP)
            obj.numP = numP;
            obj.nominal = omunirobot(parameter,Deltat,Matrix,x0,u0);

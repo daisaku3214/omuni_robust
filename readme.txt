@@ -1,33 +1,62 @@
 このプログラムは書きかけなので注意してください．
-使い方みたいなのはtestuse.mとtestuse2.mとtest3.mを実行したら大体分かってもらえると嬉しいです．
+使い方みたいなのはtestuse.mとtestuse2.mとtest3.mとtestuse4.mとtest5.mを実行したら大体分かってもらえると嬉しいです．
+testuse.mは適当にLQRによる位置制御コントローラにステップ応答を導出します。（ステップ応答なのでアホみたいな電流とかグリップ力を要求してます）
+testuse2.mとtestuse3.mはパラメータ同定誤差のないオムニマシンの軌道追従制御をします。
+testuse2.mが初期値誤差なしでtestuse3.mが初期値誤差がx方向に0.5m存在していたという状況です。
+testuse4.mとtestuse5.mはパラメータ同定誤差のあるオムニマシンの軌道追従制御をします。
+testuse4.mが初期値誤差なしでtestuse5.mが初期値誤差がx方向に0.5m存在していたという状況です。
+
 主な使い方
-robotdefine.m(ロボット定義集)->controldefine(動作範囲とか制限とか制御定義集）
-->robo = omunirobot(parameter,Deltat,x0,u0)（オムニロボット「robo」召還）
+robotdefine.m(ロボット定義集)->controldefine(動作範囲とか制限とか制御定義集、コントローラ設計とか）
+->robo = omunimachine(parameter,Deltat,sysMat,Uncertain,sensparas,...
+                      controller_parameter,x0,hatx0,u0);%で（オムニロボット「robo」召還）
 で初期設定終わり
-robo.u = newu;（roboの新しい入力，制御入力とか計算)
-->robo = robo.shiftx;(roboをルンゲクッタで10回積分)
+
+omunimachine
+  robot = class omunirobot
+  controller =  class omuni_controller
+が含まれ、robotがオムニマシンの物理層、controllerがコントローラ等のソフトウェア層になります。
+主にomuni_controllerの定義をいじることでコントローラを設計してください。
+
+robo.robot.u = newu;（roboの新しい入力，制御入力とか計算)
+->robo.robot = robo.robot.shiftx;(robo.robotをルンゲクッタで10回積分)
 –>10回繰り返す–>plot_omunirobot(robo,limit);で考えてるフィールドにroboを描画
 ->気の済むまでシミュレーション繰り返して終わり
+なんですが、robo = robo.control_shift(xref,uff,mode)に目標値を流し込めば、サンプリング周期ごとに、フィードフォワード入力として、目標値へmodeで指定された制御方法で安定化しようとします。
+modeの内訳は次の通りです。
+mode == 'LQR_single'：LQRコントローラのシングルループで制御します。添字が無い場合、重み付きミックスドローパスセンシングによって状態推定（ただし電流センサは微妙）した値を用いて安定化します。
+添字'_noest'：状態推定をせず、真値を利用して安定化をします。初期誤差等があると大きなステップ入力を出します。
+添字'_filt'：状態推定を行い、さらに制御入力にローパスをかけることで、電流の脈動などを抑えます。一方でワインドアップを原因とした発振もしかねないため、使用には注意が必要です。
+mode == 'LQR_cas'というものもありますが、LQR制御2個によるカスケード制御は、ノイズ耐性やパラメータ誤差耐性が低く、有用ではないため、今後削除予定です。
+また，controle_shiftを使用してシミュレーションすると，次のlog変数が更新されていきます。
 各種ログ
 hoge.Xlog（状態変数のlog [m][m][rad][m/s][m/s][rad/s][A]...[A])
-hoge.Ulog（入力電圧のlog[V]）
+hoge.hatXlog(状態変数の推定値のlog [m][m][rad][m/s][m/s][rad/s][A]...[A])
+hoge.Xreflog(与えられた状態変数の目標値のlog[m][m][rad][m/s][m/s][rad/s][A]...[A])
+hoge.Ulog（実際に入力された飽和ありの入力電圧のlog[V]...[V]）
+hoge.nominalUlog（計算された入力電圧のlog[V]...[V]）
 hoge.Flog (グリップ力のlog[多分N])
 hoge.Tlog (時間のlog[sec])
 になります．
-testuse.mでは入力を事前にランプ入力(1個は円を描くもの，1個は直線に移動を2回するもの）を計算していれてます．
-testuse2.mではLQRコントローラを計算してそれによる二自由度制御を簡単に事前計算して入力しています．
-testuse2.mを改造すれば実マシンの制御もシミュレーションできるかと
-testuse3.mでは適当に組んだLQR二自由度制御コントローラ2つによるカスケード制御で円軌道と直線軌道をトレースさせています．かなり良い線ですが，オブザーバーじゃ無いので、全状態観測できる必要があります．また，軌道の計算を間違えるとうまくいかないので注意してください．
+これらのlogは
+hoge.plotinputlogger(viewestimatei,viewnominalu)でグリップ力，電流，電圧を（viewestimatei=1で電流推定値を，viewnominalu=1で飽和器抜きで計算した入力電流も）描画します．
+hoge.plotoutputlogger(viewestimatex)で推定した位置と速度，目標値との位置の誤差を(viewestimatex=1で推定した位置と速度も）描画します．
+hoge.plotestimateerrorloggerで位置推定値と速度推定値の誤差を描画します．
+
+
+トレースさせたい軌道を事前にtrack1_define.m計算して、その制御軌道の目標値をトレースさせています。
 具体的には，
 ・ランプ入力にするために軌道に沿った速度を求めて
 ・求めた速度で加速した場合の時系列ごとの目標位置を計算(ここミスると死にます）
 ・求めた入力各種をきちんとフィードバック
 です．結構計算が面倒ですが，割と動いてるのでどうぞ．
-グリップ力も（怪しいですが）取れるので制御系の見積もりにもどうぞ．
+今後はomuni_controllerのなかで動的に目標値計算を行っておきたいところです。
+
+またグリップ力も（怪しいですが）取れるので制御系の見積もりにもどうぞ．
 タイヤが滑らないという仮定を入れてるのでグリップ力は無限大出せます．
 なんであんまりグリップ力を大きくすると実マシンの応答とかけ離れた応答になるので注意してください．
 追記：calc_ref.mでワールド座標上に媒介変数sで定義された軌道関数とそれ上の速度関数を利用して、その軌道上を速度のランプ入力になるような目標軌道を計算できるようにしました．以後はx = s\cos(\phi) y = s\sin(\phi) \theta = 0　，\dot{x} = \dot{s}\cos(\phi) \dot{y} = \dot{s}\sin(\phi) \dot{\theta} = 0のように媒介変数表示で軌道を定義すれば割と自由に軌道追従ができるかと思います．
-複数の軌道を繋げるときは，testuse3.mを参考にしてください．
+複数の軌道を繋げるときは，track1_define.mを参考にしてください．
 
 
 モデル化の仮定と運動方程式についてのドキュメントも未完成なのでお待ちください．
@@ -51,6 +80,32 @@ x = [q_1^T \dot{q}_1^T q_2^T]^T を状態変数ととって非線形状態方程
 だと思います．（m_0とm_mは総和したらマシン総重量になる様に合わせてくれれば大丈夫じゃないかと思います）
 重心位置を設定するパラメータ等もありますが，影響が小さいっぽいですし，同定が難しいので0で大丈夫かと．
 report.pdfに理論回りとかそこら辺書きました．（順次アップデートします）
+
+センサ部分の所定数はちょっとつかれたのでまた後で書きます。
+omunirobotがセンサーの値まで計算しています。
+omuni_controllerがそれを受けてワールド座標系での自己位置推定を行っています。
+計測輪から測定したパルス結果をhoge.robot.sensdata.dpsiに，
+モーターエンコーダから測定したパルス結果をhoge.robot.sensdata.dphiに，
+ジャイロセンサからの値を測定した角速度の離散ビット値をhoge.robot.sensdata.omegaに，
+LRFからの位置座標をhoge.robot.sensdata.pLRFに，
+LRFが来たかどうかをhoge.robot.sensdata.LRFflagに
+それぞれ保存しています．
+これをhoge.controle_shift内部で
+hoge.controller = hoge.controller.calc_hatx(hoge.robot.sensdata);
+を実行することで状態変数を推定しています。
+calc_hatx(sensdata);では，
+ジャイロからの角速度をローパスフィルタにかけ，角速度とします．
+モーターエンコーダからの値を擬似微分することで，並進速度と回転速度を導出します。
+導出した2つの角速度を重み付き積分をすることで，角度を計算します．
+計測輪のエンコーダの値をローパスフィルタをかけ、微小時間での移動量を計算します。
+計算した微小移動量を、LRFから得た真値の積分と，推定値の積分を行い、一目標値の積分をします。
+LRFの値が来た場合は，pLRFから，LRFから得た真値の積分をpLRFで置き換えます
+(hoge.controller.pLRF = sensdata.pLRF)
+真値の積分と推定値の重み付き平均をとることで，LRFからの値を適用するステップ幅を小さくし，さらに収束速度を保っています。
+その後 newx =  [x y \theta \dot{x} \dot{y} \dot{\theta}]^Tを得るため，
+これを利用して電流を推定しています．しかし，電流推定精度は悪く，真値より大きくなります．
+
+
 report.pdf内容
 1章：イントロと言う名の駄文
 2章：モデル化とシミュレーション方法

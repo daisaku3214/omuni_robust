@@ -251,13 +251,13 @@ classdef omunimachine
            legend('x-hatx');
            xlim([0 obj.Tlog(1,end)]);
            if index==1
-               ylabel('$$e_x {[m]}$$', 'interpreter', 'latex');
+               ylabel('$$e_x {[m/s]}$$', 'interpreter', 'latex');
            end
            if index==2
-               ylabel('$$e_y {[m]}$$', 'interpreter', 'latex');
+               ylabel('$$e_y {[m/s]}$$', 'interpreter', 'latex');
            end
            if index==3
-               ylabel('$$e_\theta {[rad]}$$', 'interpreter', 'latex');
+               ylabel('$$e_\theta {[rad/s]}$$', 'interpreter', 'latex');
            end
            hold off;
        end

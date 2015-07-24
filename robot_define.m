@@ -4,7 +4,7 @@
 %%
 %common definition
 dt_simcir =1e-4;    %sampling time for circuit equation
-dt_simvel =5e-3;    %sampling time for velocity simulation
+dt_simvel =1e-3;    %sampling time for velocity simulation
 dt_simpos =2.5e-2;    %sampling time for position simulation
 g = 9.80665;        %[m/s^2] the Acceleration of gravity
 ell = 4;            %the number of motor

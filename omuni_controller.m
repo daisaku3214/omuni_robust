@@ -87,6 +87,9 @@ classdef omuni_controller
        end
        function obj = calc_hatx(obj,sensdata)
            invT = obj.invTtranshat;
+           Tmat = obj.Ttranshat;
+           newi = obj.sysMat.dA(4:end,:)*[Tmat*obj.hatx(4:6);obj.hatx(7:end)]...
+                + obj.sysMat.dB(4:end,:)*obj.u;
            newx = zeros(6,1);
            psi = invT*obj.const.invCmring*((obj.sensparas.mringc)'.*sensdata.dpsi);
            phi = invT*obj.const.invCtaco*((obj.sensparas.tacoc)'.*sensdata.dphi);
@@ -113,8 +116,6 @@ classdef omuni_controller
            newx(1:3) = (obj.contpara.alfp/obj.contpara.LRFratio)*obj.pLRF ...
                      +(1-(obj.contpara.alfp/obj.contpara.LRFratio))*newx(1:3);
            newx(4:5) =obj.contpara.fvxy*phi(1:2)+(1-obj.Deltat.simvel*obj.contpara.fvxy)*obj.hatx(4:5);
-           newi = obj.sysMat.dA(4:end,:)*[newx(4:6);obj.hatx(7:end)]...
-                + obj.sysMat.dB(4:end,:)*obj.u;
            obj.hatx = [newx;newi];
        end
        function obj = Cont_LQR_cas(obj,xref,u_ff)

@@ -3,12 +3,11 @@ clear;
 robot_define;           %definition robot parameter
 control_define;         %definition contorol parameter
 
-x0 = [p0;zeros(3+ell,1)];
-hatx0 = [p0+pe;zeros(3+ell,1)];
+
+x0 = [p0+pe;zeros(3+ell,1)];
+hatx0 = [p0;zeros(3+ell,1)];
 robo = omunimachine(parameter,Deltat,Matrix,Uncertain,sensparas,controller_parameter,x0,hatx0,zeros(ell,1));
 robo = robo.setKd(Kd);
-
-mode = 'LQR_single_filt';
 
 %input example:ramp input:move circle
 track1_define;

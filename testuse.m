@@ -8,8 +8,6 @@ hatx0 = [p0;zeros(3+ell,1)];
 robo = omunimachine(parameter,Deltat,Matrix,Uncertain,sensparas,controller_parameter,x0,hatx0,zeros(ell,1));
 robo = robo.setKd(Kdreg);
 
-mode = 'LQR_single_filt';
-
 ref = [1 1 pi/4]';
 time = 2;
 length = time/robo.robot.Deltat.simvel;

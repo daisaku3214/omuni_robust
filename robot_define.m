@@ -23,7 +23,7 @@ num_mring = 2;      %the number of measurement rings
 num_jairo = 1;      %the number of jairo sensor
 num_taco = ell;     %the number of taco meter by rotary encorder
 num_LRF = 1;        %the number of LRF sensor
-idynac = 1024;      %[bit] the bit number of current sensor
+idynac = 4096;      %[bit] the bit number of current sensor
 irangec = [-10 10]; %[A]   the dynamic range of current sensor
 mringDc = 0.08;     %[m]   the diameter of measurement rings
 mringc=2*pi/(4*100)...
@@ -42,7 +42,7 @@ LRF_dt=dt_simpos;   %[sec] the sampling time of LRF
 LRFnoise = 0.0001*diag([1 1 pi]);%the Variance-covariance matrix of LRF noise
 ENCnoise = 0.000001*diag([1 1 pi]);%the Variance-covariance matrix of encorder noise
 TACnoise = 0.000001*diag([1 1 pi]); %the Variance-covariance matrix of tacometer noise
-JROnoise = 0.000001; %the covariansce of jairo noise
+JROnoise = 0.00001; %the covariansce of jairo noise
 JROoff = 1e-9;%[rad] the offset noise ratio of jairo
 %%
 %motor unit definition

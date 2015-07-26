@@ -4,16 +4,17 @@ p0 = [0;0;0];           %initial posture of machine
 pe = [0.5;0.0;0.0];   %initial posture error
 limit = [-5 5; -5 5];   %limitation of field
 viewestimatex = 1;      %plot estimate state value in log plot
-viewestimatei = 0;      %plot estimate state value in log plot
+viewestimatei = 1;      %plot estimate state value in log plot
 viewnominalu = 0;       %plot nominal input value without saturation
+mode = 'LQR_single_filt';
 %%
 %define of state estimator
-alfp = 0.05;
+alfp = 0.025;
 alfENCvsJRO = 0.0;
-fpxy = 2*pi*15;
-fvxy = 2*pi*15;
-fro= 2*pi*10;
-fu = 2*pi*25;
+fpxy = 2*pi*10;
+fvxy = 2*pi*10;
+fro= 2*pi*15;
+fu = 2*pi*20;
 %good fpxy  = 15[Hz]
 %good fvxy  = 15[Hz]
 %good fro   =  5[Hz]
